@@ -1,134 +1,209 @@
 ﻿using System;
 using System.Linq;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace Snakie
 {
-    class Program
+    class Juego
     {
-        static readonly int fieldWidth = 40;
-        static readonly int fieldHeight = 30;
-        private const ConsoleColor BorderColor = ConsoleColor.Cyan;
-        private const ConsoleColor HeadColor = ConsoleColor.Yellow;
-        private const ConsoleColor Bodycolor = ConsoleColor.Magenta;
-        private const ConsoleColor FoodColor = ConsoleColor.Red;
-        private const int Frames = 150;
+        // Define el tamaño del tablero
+        static readonly int anchoTablero = 40;
+        static readonly int alturaTablero = 20;
 
+        // Define los colores a utilizar en el juego
+        private const ConsoleColor ColorBorde = ConsoleColor.Magenta;
+        private const ConsoleColor ColorCabeza = ConsoleColor.Cyan;
+        private const ConsoleColor ColorCuerpo = ConsoleColor.Red;
+        private const ConsoleColor ColorComida = ConsoleColor.Green;
+
+        // Define los frames de refrescado
+        private const int FramesMinimos = 50;
+        private const int FramesIniciales = 150;
+        static int frames = 150;
+
+        // Método main
         static void Main()
         {
-            //Console.SetWindowSize(fieldWidth, fieldHeight);
-            //Console.SetBufferSize(fieldWidth, fieldHeight);
+            // No hacer visible el cursor en la consola
             Console.CursorVisible = false;
+            
+            // Bucle del juego
             while (true)
             {
-                GameStart();
-                Console.ReadKey();
+                MenuPrincipal();
+                ConsoleKeyInfo keyInfo = Console.ReadKey();
+                char eleccion = keyInfo.KeyChar;
+                if (eleccion == '1')
+                {
+                    IniciarJuego();
+                    Console.ReadKey();
+                }
+                else if (eleccion == '2')
+                {
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.CursorVisible = true;
+                    System.Environment.Exit(1); 
+                }
             }
         }
 
-        static void GameStart()
+        // Método de inicialización del juego
+        static void IniciarJuego()
         {
+            // Se limpia la pantalla
             Console.Clear();
 
-            DrawBorder();
+            // Se dibuja el tablero
+            DibujarTablero();
 
-            Direction movement = Direction.Up;
+            // La dirección por defecto es hacia arriba
+            Direccion movimiento = Direccion.Arriba;
 
-            var snake = new SnakeItSelf(initialX: fieldWidth / 2, initialY: fieldHeight / 2, HeadColor, Bodycolor);
+            // Crea una serpiente con los parametros por defecto
+            var snake = new Snake(Xinicial: anchoTablero / 2, Yinicial: alturaTablero / 2, ColorCabeza, ColorCuerpo);
             Stopwatch stw = new();
-            int score = 0;
 
-            Pixel food = GetFood(snake);
-            food.Draw();
+            // Inicia la puntuación en 0
+            int puntaje = 0;
 
+            // Dibuja la comida en la pantalla
+            Pixel food = NuevaComida(snake);
+            food.Dibujar();
+
+            // Bucle de movimiento de la serpiente
             while (true)
             {
                 stw.Restart();
 
-                Direction prevMovement = movement;
-                while (stw.ElapsedMilliseconds <= Frames)
+                // Se mueve hacia arriba por defecto
+                Direccion movimientoAnterior = movimiento;
+                
+                // Sigue moviendo la serpiente a la velocidad de los frames
+                while (stw.ElapsedMilliseconds <= frames)
                 {
-                    if (movement == prevMovement)
+                    if (movimiento == movimientoAnterior)
                     {
-                        movement = Movement(movement);
+                        movimiento = Movimiento(movimiento);
                     }
 
                 }
-                if(snake.Head.X == food.X && snake.Head.Y == food.Y)
+                // Si la serpiente come una comida, aumenta el tamaño de la serpiente y aumenta el puntaje
+                if(snake.Cabeza.X == food.X && snake.Cabeza.Y == food.Y)
                 {
-                    snake.Move(movement, eat: true);
-                    food = GetFood(snake);
-                    food.Draw();
-                    score++;
+                    Console.Beep();
+                    snake.Mover(movimiento, eat: true);
+                    food = NuevaComida(snake);
+                    food.Dibujar();
+                    puntaje++;
+                    frames -= 5;
+                    if (frames < FramesMinimos)
+                    {
+                        frames = FramesMinimos;
+                    }
                 }
+                // De lo contrario, sigue moviendose
                 else
                 {
-                    snake.Move(movement);
+                    snake.Mover(movimiento);
                 }
 
-
-
-                if (snake.Head.X == fieldWidth - 1
-                    || snake.Head.X == 0
-                    || snake.Head.Y == fieldHeight - 1
-                    || snake.Head.Y == 0
-                    || snake.Body.Any(i => i.X == snake.Head.X && i.Y == snake.Head.Y))
-
-                    break;
+                // Si la serpiente colisiona con sigo misma o el tablero, termina el bucle 
+                if (snake.Cabeza.X == anchoTablero - 1
+                    || snake.Cabeza.X == 0
+                    || snake.Cabeza.Y == alturaTablero - 1
+                    || snake.Cabeza.Y == 0
+                    || snake.Cuerpo.Any(i => i.X == snake.Cabeza.X && i.Y == snake.Cabeza.Y))
+                    {
+                        Console.Beep();
+                        break;
+                    }
             }
 
-            snake.Clear();
-            Console.SetCursorPosition(left: 15, top: 10);
+            // Limpia la serpiente
+            snake.Limpiar();
+            // Setea la posicion del cursor en el centro del tablero para mostrar el mensaje de GAME OVER
+            Console.SetCursorPosition(left: 9, top: 10);
+            // Setea el color del texto en verde
             Console.ForegroundColor = ConsoleColor.Green;
+            // Muestra el mensaje de GAME OVER
             Console.WriteLine("GAME OVER");
-            Console.SetCursorPosition(left: 14, top: 13);
-            Console.WriteLine($"U'r score: {score}");
-
+            // Setea la posición del cursor debajo del mensaje de GAME OVER para mostrar el puntaje
+            Console.SetCursorPosition(left: 7, top: 13);
+            // Muestra el puntaje obtenido
+            Console.WriteLine($"Tu puntuación ha sido: {puntaje}");
+            // Muestra el mensaje de volver al menu
+            Console.SetCursorPosition(left: 7, top: 14);
+            Console.WriteLine("Presiona cualquier tecla para volver");
+            Console.SetCursorPosition(left: 7, top: 15);
+            Console.WriteLine("al menu principal");
+            frames = FramesIniciales;
         }
 
-        static Pixel GetFood(SnakeItSelf snake)
+        // Método para obtener la nueva posición de la comida en pantalla, dependiendo de la posición de la serpiente
+        static Pixel NuevaComida(Snake snake)
         {
             Pixel food;
-
             do
             {
-                food = new Pixel(new Random().Next(1, fieldWidth - 2), new Random().Next(1, fieldHeight - 2), FoodColor);
+                food = new Pixel(new Random().Next(1, anchoTablero - 2), new Random().Next(1, alturaTablero - 2), ColorComida);
             }
-            while (snake.Head.X == food.X && snake.Head.Y == food.Y || snake.Body.Any(i => i.X == snake.Head.X && i.Y == snake.Head.Y));
+            while (snake.Cabeza.X == food.X && snake.Cabeza.Y == food.Y || snake.Cuerpo.Any(i => i.X == snake.Cabeza.X && i.Y == snake.Cabeza.Y));
 
             return food;
         }
 
-
-        static Direction Movement(Direction currrentDirection)
+        // Método para el movimiento de la serpiente con las teclas WASD
+        static Direccion Movimiento(Direccion direccionActual)
         {
-            if (!Console.KeyAvailable) return currrentDirection;
+            if (!Console.KeyAvailable) return direccionActual;
 
             ConsoleKey key = Console.ReadKey(intercept: true).Key;
 
-            currrentDirection = key switch
+            direccionActual = key switch
             {
-                ConsoleKey.W when currrentDirection != Direction.Down => Direction.Up,
-                ConsoleKey.S when currrentDirection != Direction.Up => Direction.Down,
-                ConsoleKey.D when currrentDirection != Direction.Left => Direction.Right,
-                ConsoleKey.A when currrentDirection != Direction.Right => Direction.Left,
-                _ => currrentDirection
+                ConsoleKey.W when direccionActual != Direccion.Abajo => Direccion.Arriba,
+                ConsoleKey.S when direccionActual != Direccion.Arriba => Direccion.Abajo,
+                ConsoleKey.D when direccionActual != Direccion.Izquierda => Direccion.Derecha,
+                ConsoleKey.A when direccionActual != Direccion.Derecha => Direccion.Izquierda,
+                _ => direccionActual
             };
-            return currrentDirection;
+            return direccionActual;
         }
 
-        static void DrawBorder()
+        // Método para dibujar el tablero
+        static void DibujarTablero()
         {
-            for (int i = 0; i < fieldWidth; i++)
+            for (int i = 0; i < anchoTablero; i++)
             {
-                new Pixel(x: i, y: 0, BorderColor).Draw();
-                new Pixel(x: i, y: fieldHeight -1, BorderColor).Draw();
+                new Pixel(x: i, y: 0, ColorBorde).Dibujar();
+                new Pixel(x: i, y: alturaTablero -1, ColorBorde).Dibujar();
             }
-            for (int i = 0; i < fieldHeight; i++)
+            for (int i = 0; i < alturaTablero; i++)
             {
-                new Pixel(x: 0, y: i, BorderColor).Draw();
-                new Pixel(x: fieldWidth - 1, y: i, BorderColor).Draw();
+                new Pixel(x: 0, y: i, ColorBorde).Dibujar();
+                new Pixel(x: anchoTablero - 1, y: i, ColorBorde).Dibujar();
             }
+        }
+
+        static void MenuPrincipal()
+        {
+            // Dibuja el menu principal
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine(" ");
+            Console.WriteLine(@"MP'''''''MM                   dP       oo          dP");
+            Console.WriteLine(@"M  mmmmm..M                   88                   88"); 
+            Console.WriteLine(@"M.      `YM 88d888b. .d8888b. 88  .dP  dP .d8888b. 88"); 
+            Console.WriteLine(@"MMMMMMM.  M 88'  `88 88'  `88 888888   88 88ooood8 dP");
+            Console.WriteLine(@"M. .MMM'  M 88    88 88.  .88 88  `8b. 88 88.  ...   ");  
+            Console.WriteLine(@"Mb.     .dM dP    dP `88888P8 dP   `YP dP `88888P' oo");
+            Console.WriteLine(@"MMMMMMMMMMM                                          ");   
+            Console.WriteLine(" ");
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Presiona 1 para iniciar el juego, 2 para salir");
+            Console.WriteLine("Teclas de movimiento: W para arriba, S para abajo, A para izquierda, D para derecha");
         }
     }
 }
