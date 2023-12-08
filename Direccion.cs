@@ -1,11 +1,11 @@
 ﻿namespace Snakie
 {
-    // Enumaración para almacenar las posibles direcciones de movimiento
-    public enum Direccion
+    // Enumeration to store possible directions of movement
+    public enum Direction
     {
-        Arriba,
-        Abajo,
-        Izquierda,
-        Derecha
+        Up,
+        Down,
+        Left,
+        Right
     }
 }

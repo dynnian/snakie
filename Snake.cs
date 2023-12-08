@@ -1,74 +1,71 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Snakie
+﻿namespace Snakie
 {
     class Snake
     {
-        // Atributos de la clase para recibir los colores de la serpiente
-        private readonly ConsoleColor _colorCabeza;
-        private readonly ConsoleColor _colorCuerpo;
+        // Class attributes to receive snake colors
+        private readonly ConsoleColor _headColor;
+        private readonly ConsoleColor _bodyColor;
 
-        // Método constructor para inicializar el objeto serpiente con los correspondientes atributos
-        public Snake(int Xinicial, int Yinicial, ConsoleColor colorCabeza, ConsoleColor colorCuerpo, int longitudCuerpo = 0)
+        // Constructor method to initialize the snake object with corresponding attributes
+        public Snake(int initialX, int initialY, ConsoleColor headColor, ConsoleColor bodyColor, int bodyLength = 0)
         {
-            _colorCabeza = colorCabeza;
-            _colorCuerpo = colorCuerpo;
-            Cabeza = new Pixel(Xinicial, Yinicial, _colorCabeza);
+            _headColor = headColor;
+            _bodyColor = bodyColor;
+            Head = new Pixel(initialX, initialY, _headColor);
 
-            for(int i = longitudCuerpo; i >= 0; i--)
+            for (int i = bodyLength; i >= 0; i--)
             {
-                Cuerpo.Enqueue(item: new Pixel(x: Cabeza.X - i - 1, Yinicial, _colorCuerpo));
+                Body.Enqueue(new Pixel(x: Head.X - i - 1, initialY, _bodyColor));
             }
 
-            Dibujar();
+            Draw();
         }
 
-        // Método get/set para crear la cabeza
-        public Pixel Cabeza { get; private set; }
+        // Get/set method to create the head
+        public Pixel Head { get; private set; }
 
-        // Método geter para crear el cuerpo
-        public Queue<Pixel> Cuerpo { get; } = new Queue<Pixel>();
+        // Getter method to create the body
+        public Queue<Pixel> Body { get; } = new Queue<Pixel>();
 
-        // Método para mover la serpiente
-        public void Mover(Direccion direccion, bool eat = false)
+        // Method to move the snake
+        public void Move(Direction direction, bool eat = false)
         {
-            // Limpia la serpiente
-            Limpiar();
-            Cuerpo.Enqueue(item: new Pixel(Cabeza.X, Cabeza.Y, _colorCuerpo));
+            // Clear the snake
+            Clear();
+            Body.Enqueue(new Pixel(Head.X, Head.Y, _bodyColor));
             if (!eat)
-               Cuerpo.Dequeue();
+                Body.Dequeue();
 
-            Cabeza = direccion switch
+            Head = direction switch
             {
-                Direccion.Arriba => new Pixel(Cabeza.X, y: Cabeza.Y - 1, _colorCabeza),
-                Direccion.Abajo => new Pixel(Cabeza.X, y: Cabeza.Y + 1, _colorCabeza),
-                Direccion.Derecha => new Pixel(x: Cabeza.X + 1, Cabeza.Y, _colorCabeza),
-                Direccion.Izquierda => new Pixel(x: Cabeza.X - 1, Cabeza.Y, _colorCabeza),
-                _=> Cabeza
+                Direction.Up => new Pixel(Head.X, y: Head.Y - 1, _headColor),
+                Direction.Down => new Pixel(Head.X, y: Head.Y + 1, _headColor),
+                Direction.Right => new Pixel(x: Head.X + 1, Head.Y, _headColor),
+                Direction.Left => new Pixel(x: Head.X - 1, Head.Y, _headColor),
+                _ => Head
             };
 
-            Dibujar();
+            Draw();
         }
-        
-        // Método para dibujar la serpiente
-        public void Dibujar()
-        {
-            Cabeza.Dibujar();
 
-            foreach(Pixel pixel in Cuerpo)
+        // Method to draw the snake
+        public void Draw()
+        {
+            Head.Draw();
+
+            foreach (Pixel pixel in Body)
             {
-                pixel.Dibujar();
+                pixel.Draw();
             }
         }
 
-        // Método para limpiar la serpiente
-        public void Limpiar()
+        // Method to clear the snake
+        public void Clear()
         {
-            Cabeza.Limpiar();
-            foreach (Pixel pixel in Cuerpo)
+            Head.Clear();
+            foreach (Pixel pixel in Body)
             {
-                pixel.Limpiar();
+                pixel.Clear();
             }
         }
     }

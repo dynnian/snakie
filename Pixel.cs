@@ -1,13 +1,11 @@
-﻿using System;
-
-namespace Snakie
+﻿namespace Snakie
 {
     public readonly struct Pixel
     {
-        // Caracter principal para dibujar
+        // Main character for drawing
         private const char PixelChar = '█';
 
-        // Método constructor
+        // Constructor method
         public Pixel(int x, int y, ConsoleColor color)
         {
             X = x;
@@ -15,23 +13,23 @@ namespace Snakie
             Color = color;
         }
 
-        // Métodos geters para establecer atributos X y Y
+        // Getter methods to set X and Y attributes
         public int X { get; }
         public int Y { get; }
 
-        // Método geter para establecer el color a dibujar
+        // Getter method to set the color to draw
         public ConsoleColor Color { get; }
 
-        // Método para dibujar en pantalla
-        public void Dibujar()
+        // Method to draw on the screen
+        public void Draw()
         {
             Console.ForegroundColor = Color;
             Console.SetCursorPosition(left: X, top: Y);
             Console.Write(PixelChar);
         }
 
-        // Método para limpiar pantalla
-        public void Limpiar()
+        // Method to clear the screen
+        public void Clear()
         {
             Console.SetCursorPosition(left: X, top: Y);
             Console.Write(' ');
