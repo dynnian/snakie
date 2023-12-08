@@ -58,19 +58,13 @@ snake, eat the food, and try to achieve the highest score!
     cd Snakie/Snakie
     ```
 
-3. Build the solution:
-
-    ```bash
-    dotnet build
-    ```
-
-4. Run the game:
+3. Run the game:
 
     ```bash
     dotnet run
     ```
 
-5. Follow the on-screen instructions to navigate the menu and play the game.
+4. Follow the on-screen instructions to navigate the menu and play the game.
 
 ## Contributing
 
