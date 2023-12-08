@@ -55,7 +55,7 @@ snake, eat the food, and try to achieve the highest score!
 2. Navigate to the project directory:
 
     ```bash
-    cd Snakie
+    cd Snakie/Snakie
     ```
 
 3. Build the solution:
