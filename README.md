@@ -7,7 +7,7 @@ Snakie is a simple console-based Snake game written in C#.
 - [Introduction](#introduction)
 - [Features](#features)
 - [How to Play](#how-to-play)
-- [Building & Running](#building&running)
+- [Building & Running](#building--running)
 - [Contributing](#contributing)
 - [License](#license)
 
